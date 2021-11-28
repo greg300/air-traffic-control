@@ -26,3 +26,7 @@ class WeatherGenerator:
         self._current_weather = WeatherReport()
 
 
+    @property
+    def current_weather(self):
+        return self._current_weather
+
