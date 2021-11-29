@@ -21,11 +21,14 @@ class ATCSShell(cmd.Cmd):
         """
         self._tower.step_time()
 
-        state = self._tower.state()
+        planes = self._tower.planes
 
         print('| Plane  | Flight Num  | Gate  | State                     |')
-        for airplane in state:
-            print(airplane)
+        for plane in planes:
+            print('| {0:>6d} | {1:>11d} | {2:>5s} | {3:<25s} |'.format(plane.plane_id,
+                                                                       plane.flight_info.flight_number,
+                                                                       str(plane.gate),
+                                                                       plane.state))
 
 
     def do_exit(self, arg):

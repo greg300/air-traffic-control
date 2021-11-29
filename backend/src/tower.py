@@ -1,4 +1,3 @@
-import copy
 import random
 from queue import Queue
 
@@ -69,7 +68,8 @@ class Tower:
             plane.step_time(self._time)
 
 
-    def state(self):
+    @property
+    def planes(self):
         return self._planes.values()
 
 
@@ -126,3 +126,7 @@ class Tower:
             return self._airport.assign_gate()
 
         return None
+
+
+    def replace_gate(self, gate: int):
+        self._airport.replace_gate(gate)

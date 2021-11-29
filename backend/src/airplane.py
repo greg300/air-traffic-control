@@ -6,8 +6,8 @@ from flightinfo import FlightInfo
 
 
 class State(Enum):
-    Idle = 0
-    AtGate = 1
+    AtGateArrived = 0
+    AtGateDeparting = 1
     TaxiingToRunway = 2
     TakeOff = 3
     InFlight = 4
@@ -19,8 +19,8 @@ class State(Enum):
 class Airplane:
     def __init__(self, plane_id, time, tower, gate=None):
         self._handlers = {
-            State.Idle: self.state_idle,
-            State.AtGate: self.state_at_gate,
+            State.AtGateArrived: self.state_at_gate_arrived,
+            State.AtGateDeparting: self.state_at_gate_departing,
             State.TaxiingToRunway: self.state_taxiing_to_runway,
             State.TakeOff: self.state_take_off,
             State.InFlight: self.state_in_flight,
@@ -42,7 +42,7 @@ class Airplane:
         self._flight_info = FlightInfo(time, gate is None)
 
         if gate:
-            self._state = State.AtGate
+            self._state = State.AtGateDeparting
         else:
             self._state = State.InFlight
 
@@ -57,23 +57,39 @@ class Airplane:
         return self._flight_info
 
 
+    @property
+    def gate(self):
+        return self._gate
+
+
+    @property
+    def state(self):
+        return self._state
+
+
     def step_time(self, time):
         self._handlers[self._state](time)
 
 
-    def state_idle(self, time):
+    def state_at_gate_arrived(self, time):
         self._counter -= 1
 
         if self._counter <= 0:
             self._flight_info.generate_next_flight(time, False)
 
+            self._state = State.AtGateDeparting
 
-    def state_at_gate(self, time):
+
+    def state_at_gate_departing(self, time):
         time_to_departure = self._flight_info.departure_time - time
 
         if time_to_departure <= constants.DEPARTURE_LEAD_TIME:
             if self._tower.request_slot_for_departure(self):
                 self._state = State.TaxiingToRunway
+                # release the gate
+                self._tower.replace_gate(self._gate)
+
+                self._gate = None
 
 
     def state_taxiing_to_runway(self, time):
@@ -110,7 +126,8 @@ class Airplane:
 
             self._counter = random.randint(constants.IDLE_TIME_MIN,
                                            constants.IDLE_TIME_MAX)
-            self._state = State.Idle
+
+            self._state = State.AtGateArrived
 
 
     def __str__(self):
