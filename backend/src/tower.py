@@ -75,7 +75,7 @@ class Tower:
 
     @property
     def departure_lead_time(self):
-        return self._departure_q.length + 1
+        return self._departure_q.length + 2
 
 
     @property

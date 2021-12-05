@@ -12,12 +12,16 @@ app = Flask(__name__)
 
 wg = WeatherGenerator()
 
+# Only show good weather case to start
+wg.current_weather.rain = False
+
 tower = Tower(constants.NUM_PLANES,
               constants.NUM_GATES,
               wg)
 
 
-def to_html(departures, arrivals):
+
+def to_html(now, departures, arrivals):
     html = '<head>'
     html += '<style>'
     html += 'table {'
@@ -38,36 +42,45 @@ def to_html(departures, arrivals):
     html += '</style>'
     html += '</head>'
 
-    html += '<h2>Departure</h2>'
+    html += '<h2>Departures</h2>'
     html += f'<table>'
-    html += f'<tr><th>Plane</th><th>Flight</th><th>Gate</th><th>Time</th><th>State</th></tr>'
+    html += f'<tr><th>Plane</th><th>Flight</th><th>Gate</th><th>Time</th><th>Status</th><th>State</th></tr>'
     for plane in departures:
         gate = plane.gate
-
         if not gate:
             gate = ''
-        html += f'<tr><td>{plane.plane_id}</td><td>{plane.flight_info.flight_number}</td><td>{gate}</td><td>{plane.flight_info.departure_time}</td><td>{plane.state}</td></tr>'
+        status = 'On Time' if plane.flight_info.departure_time >= now else 'Delayed'
+        html += f'<tr><td>{plane.plane_id}</td><td>{plane.flight_info.flight_number}</td><td>{gate}</td><td>{plane.flight_info.departure_time}</td><td>{status}</td><td>{plane.state}</td></tr>'
     html += f'</table>'
 
     html += '<h2>Arrivals</h2>'
     html += f'<table>'
-    html += f'<tr><th>Plane</th><th>Flight</th><th>Gate</th><th>Time</th><th>State</th></tr>'
+    html += f'<tr><th>Plane</th><th>Flight</th><th>Gate</th><th>Time</th><th>Status</th><th>State</th></tr>'
     for plane in arrivals:
         gate = plane.gate
         if not gate:
             gate = ''
-        html += f'<tr><td>{plane.plane_id}</td><td>{plane.flight_info.flight_number}</td><td>{gate}</td><td>{plane.flight_info.arrival_time}</td><td>{plane.state}</td></tr>'
+        status = 'Delayed'
+        if plane.is_arrived:
+            status = 'Arrived'
+        elif plane.flight_info.arrival_time >= now:
+            status = 'On Time'
+        html += f'<tr><td>{plane.plane_id}</td><td>{plane.flight_info.flight_number}</td><td>{gate}</td><td>{plane.flight_info.arrival_time}</td><td>{status}</td><td>{plane.state}</td></tr>'
     html += f'</table>'
-    
+
     return html
-    
+
 
 @app.route('/atcs')
 def get_next():
     tower.step_time()
 
-    return f'<h1>Scarlet Knight Airways: Time={tower.time}</h1>' + \
-        to_html(tower.departures, tower.arrivals)
+    now = tower.time
+
+    return f'<h1>Scarlet Knight Airways</h1>' + \
+        f'<h2>Time={now}</h2>' + \
+        f'<h2>Weather Hold: {not tower.weather_ok}</h2>' + \
+        to_html(now, tower.departures, tower.arrivals)
 
 
 if __name__=='__main__':
