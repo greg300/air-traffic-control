@@ -46,6 +46,24 @@ class Airplane:
         else:
             self._state = State.InFlight
 
+    @property
+    def is_departing(self):
+        return self._state in [ State.AtGateDeparting,
+                                State.TaxiingToRunway,
+                                State.TakeOff ]
+
+    @property
+    def is_arriving(self):
+        return self._state in [ State.InFlight,
+                                State.Approaching,
+                                State.Landed,
+                                State.TaxiingToGate,
+                                State.AtGateArrived ]
+
+    @property
+    def is_arrived(self):
+        return self._state in [ State.AtGateArrived ]
+
 
     @property
     def plane_id(self):
@@ -83,7 +101,7 @@ class Airplane:
     def state_at_gate_departing(self, time):
         time_to_departure = self._flight_info.departure_time - time
 
-        if time_to_departure <= constants.DEPARTURE_LEAD_TIME:
+        if time_to_departure <= self._tower.departure_lead_time:
             if self._tower.request_slot_for_departure(self):
                 self._state = State.TaxiingToRunway
                 # release the gate
@@ -104,7 +122,7 @@ class Airplane:
     def state_in_flight(self, time):
         time_to_arrival = self._flight_info.arrival_time - time
 
-        if time_to_arrival <= constants.ARRIVAL_LEAD_TIME:
+        if time_to_arrival <=  self._tower.arrival_lead_time:
             if self._tower.request_slot_for_landing(self):
                 self._state = State.Approaching
 

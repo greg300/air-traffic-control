@@ -47,12 +47,6 @@ class Tower:
         self._landing_q = Queue(num_landing_spots)
 
 
-    def _weather_ok(self):
-        # TODO, evaluate current weather for ok to proceed
-        # conditions for departure or arrival
-        return True
-
-
     def step_time(self):
         self._time += 1
 
@@ -68,12 +62,46 @@ class Tower:
             plane.step_time(self._time)
 
 
+
+    @property
+    def weather_ok(self):
+        return not self._weather_generator.current_weather.rain
+
+
+    @property
+    def time(self):
+        return self._time
+
+
+    @property
+    def departure_lead_time(self):
+        return self._departure_q.length + 1
+
+
+    @property
+    def arrival_lead_time(self):
+        return self._arrival_q.length + self._landing_q.length + 2
+
+
     @property
     def planes(self):
         return self._planes.values()
 
 
+    @property
+    def departures(self):
+        return [ plane for plane in self.planes if plane.is_departing ]
+
+
+    @property
+    def arrivals(self):
+        return [ plane for plane in self.planes if plane.is_arriving ]
+
+
     def request_slot_for_departure(self, plane: Airplane) -> bool:
+        if not self.weather_ok:
+            return False
+
         # clear plane for departure if there is a spot at
         # the end of the departure queue
         if not self._departure_q.can_add():
@@ -87,7 +115,7 @@ class Tower:
     def request_clear_for_takeoff(self, plane: Airplane) -> bool:
         # clear flane for takeoff if it is in front of the
         # departure queue and weather is ok
-        if not self._weather_ok():
+        if not self.weather_ok:
             return False
 
         if not plane == self._departure_q.front:
@@ -99,6 +127,9 @@ class Tower:
 
 
     def request_slot_for_landing(self, plane: Airplane) -> bool:
+        if not self.weather_ok:
+            return False
+
         # request slot for landing if there is a spot at
         # the end of the landing queue
         if not self._landing_q.can_add():
@@ -110,6 +141,9 @@ class Tower:
 
 
     def request_clear_for_landing(self, plane: Airplane) -> bool:
+        if not self.weather_ok:
+            return False
+
         # allow a plane to land if it is at the front of
         # the landing queue and weather is ok
         if self._landing_q.front == plane:

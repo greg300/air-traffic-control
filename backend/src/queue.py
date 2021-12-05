@@ -19,6 +19,11 @@ class Queue:
 
 
     @property
+    def length(self):
+        return len(self._q)
+
+
+    @property
     def front(self):
         return self._front
 
