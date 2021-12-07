@@ -23,26 +23,11 @@ tower = Tower(constants.NUM_PLANES,
 
 def to_html(now, departures, arrivals):
     html = '<head>'
-    html += '<style>'
-    html += 'table {'
-    html += 'font-family: arial, sans-serif;'
-    html += 'border-collapse: collapse;'
-    html += 'width: 100%;'
-    html += '}'
-
-    html += 'td, th {'
-    html += 'border: 1px solid #dddddd;'
-    html += 'text-align: left;'
-    html += 'padding: 8px;'
-    html += '}'
-
-    html += 'tr:nth-child(even) {'
-    html += 'background-color: #dddddd;'
-    html += '}'
-    html += '</style>'
+    html += '<title>ATCS</title>'
+    html += '<link rel="stylesheet" href="/static/css/style.css">'
     html += '</head>'
 
-    html += '<h2>Departures</h2>'
+    html += '<h4>Departures</h4>'
     html += f'<table>'
     html += f'<tr><th>Plane</th><th>Flight</th><th>Gate</th><th>Time</th><th>Status</th><th>State</th></tr>'
     for plane in departures:
@@ -53,7 +38,7 @@ def to_html(now, departures, arrivals):
         html += f'<tr><td>{plane.plane_id}</td><td>{plane.flight_info.flight_number}</td><td>{gate}</td><td>{plane.flight_info.departure_time}</td><td>{status}</td><td>{plane.state}</td></tr>'
     html += f'</table>'
 
-    html += '<h2>Arrivals</h2>'
+    html += '<h4>Arrivals</h4>'
     html += f'<table>'
     html += f'<tr><th>Plane</th><th>Flight</th><th>Gate</th><th>Time</th><th>Status</th><th>State</th></tr>'
     for plane in arrivals:
@@ -77,10 +62,14 @@ def get_next():
 
     now = tower.time
 
-    return f'<h1>Scarlet Knight Airways</h1>' + \
-        f'<h2>Time={now}</h2>' + \
-        f'<h2>Weather Hold: {not tower.weather_ok}</h2>' + \
-        to_html(now, tower.departures, tower.arrivals)
+    return f'<header><h3>Scarlet Knight Airways</h3></header>' + \
+        f'<section id="status">' + \
+        f'<h4>Time: {now}</h4>' + \
+        f'<h4>Weather Hold: {not tower.weather_ok}</h4>' + \
+        f'</section>' + \
+        f'<section id="flights">' + \
+        to_html(now, tower.departures, tower.arrivals) + \
+        f'</section>'
 
 
 if __name__=='__main__':
