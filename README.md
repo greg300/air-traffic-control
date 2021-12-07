@@ -25,3 +25,12 @@ To launch frontend on localhost:
 Navigate to `localhost:5000/atcs` (`http://127.0.0.1:5000/atcs`).
 
 Refresh page to "step" time.
+
+#### Testing
+To run unit tests:
+
+`$ python src/x`
+
+where x is one of:
+* test_flightinfo.py
+* test_weather.py
