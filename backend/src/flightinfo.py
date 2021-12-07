@@ -32,9 +32,9 @@ class FlightInfo:
 
         self._flight_number = next_flight
 
-        self._departure_time = time + random.randint(6, 20)
+        self._departure_time = time + random.randint(constants.TIME_TO_DEPART_MIN, constants.TIME_TO_DEPART_MAX)
 
-        self._arrival_time = self._departure_time + random.randint(12, 60)
+        self._arrival_time = self._departure_time + random.randint(constants.TIME_TO_ARRIVE_MIN, constants.TIME_TO_ARRIVE_MAX)
 
 
     @property
