@@ -56,10 +56,24 @@ def to_html(now, departures, arrivals):
     return html
 
 
-@app.route('/atcs')
+@app.route('/next')
 def get_next():
     tower.step_time()
 
+    now = tower.time
+
+    return f'<header><h3>Scarlet Knight Airways</h3></header>' + \
+        f'<section id="status">' + \
+        f'<h4>Time: {now}</h4>' + \
+        f'<h4>Weather Hold: {not tower.weather_ok}</h4>' + \
+        f'</section>' + \
+        f'<section id="flights">' + \
+        to_html(now, tower.departures, tower.arrivals) + \
+        f'</section>'
+
+
+@app.route('/')
+def get_current():
     now = tower.time
 
     return f'<header><h3>Scarlet Knight Airways</h3></header>' + \
